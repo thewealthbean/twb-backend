@@ -88,7 +88,7 @@ app.post('/api/interest', async (req, res) => {
             subject: 'Welcome to the wealth bean Early Access 🚀',
           html: `
             <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
-                <h2 style="color: #0ea5e9; font-size: 24px; margin-bottom: 12px;">🚀 Welcome to TradeProof, ${firstName}!</h2>
+                <h2 style="color: #0ea5e9; font-size: 24px; margin-bottom: 12px;">🚀 Welcome to the wealth bean, ${firstName}!</h2>
                 
                 <p style="margin-bottom: 16px;">
                 You’re officially on the early access list for the ultimate verified trading journal and community for Indian traders. We’re thrilled to have you with us! 🎉
