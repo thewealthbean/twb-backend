@@ -83,9 +83,9 @@ app.post('/api/interest', async (req, res) => {
         const firstName = fullName.split(' ')[0];
         try {
             await resend.emails.send({
-            from: 'TradeProof <onboarding@thewealthbean.com>', // verified custom domain
+            from: 'the wealth bean <onboarding@thewealthbean.com>', // verified custom domain
             to: email,
-            subject: 'Welcome to TradeProof Early Access 🚀',
+            subject: 'Welcome to the wealth bean Early Access 🚀',
           html: `
             <div style="font-family: Arial, sans-serif; color: #111; line-height: 1.6;">
                 <h2 style="color: #0ea5e9; font-size: 24px; margin-bottom: 12px;">🚀 Welcome to TradeProof, ${firstName}!</h2>
@@ -95,7 +95,7 @@ app.post('/api/interest', async (req, res) => {
                 </p>
 
                 <p style="margin-bottom: 16px; font-weight: bold; color: #10b981;">
-                As a special thank you, you’ve secured <strong>3 months of TradeProof Pro for free</strong> when we launch. 💎
+                As a special thank you, you’ve secured <strong>1 month of the wealth bean Pro for free</strong> when we launch. 💎
                 </p>
 
                 <p style="margin-bottom: 16px;">
@@ -106,12 +106,12 @@ app.post('/api/interest', async (req, res) => {
                 Keep an eye on your inbox — big things are coming soon!
                 </p>
 
-                <p style="font-weight: bold;">— The TradeProof Team</p>
+                <p style="font-weight: bold;">— The Wealth Bean Team</p>
 
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;" />
 
                 <p style="font-size: 12px; color: #9ca3af;">
-                You are receiving this email because you joined the TradeProof early access list. If this wasn’t you, please ignore this email.
+                You are receiving this email because you joined the TWB early access list. If this wasn’t you, please ignore this email.
                 </p>
             </div>
 `
