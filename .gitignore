@@ -1,2 +1,38 @@
+<<<<<<< HEAD
 node_modules
 .env
+=======
+# ========================
+# ENV FILES (CRITICAL)
+# ========================
+.env
+.env.*
+
+# ========================
+# NODE
+# ========================
+node_modules/
+npm-debug.log
+package-lock.json
+
+# ========================
+# PYTHON
+# ========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+
+# ========================
+# UPLOADS
+# ========================
+uploads/
+
+# ========================
+# SYSTEM FILES
+# ========================
+.DS_Store
+Thumbs.db
+>>>>>>> 6280ded (setup python engine)

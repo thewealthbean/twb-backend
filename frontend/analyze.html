@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Trades | the wealth bean</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#030508',
+                        primary: '#6366F1',
+                        'primary-hover': '#4F46E5',
+                        accent: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        purple: '#8B5CF6',
+                        'text-primary': '#F9FAFB',
+                        'text-secondary': '#9CA3AF',
+                        card: '#0B0E14',
+                        border: 'rgba(255, 255, 255, 0.08)',
+                        'border-hover': 'rgba(255, 255, 255, 0.15)',
+                        glow: 'rgba(99, 102, 241, 0.2)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+        }
+
+        .hero-glow {
+            background: radial-gradient(circle, var(--glow) 0%, rgba(3, 5, 8, 0) 50%);
+        }
+
+        nav.scrolled { border-bottom-color: rgba(255, 255, 255, 0.08); background: rgba(3, 5, 8, 0.85); }
+        
+        .modal-overlay { transition: opacity 0.2s, visibility 0.2s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-container { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active .modal-container { transform: translateY(0) scale(1); }
+
+        .select-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        /* Drag active state */
+        .drag-active {
+            border-color: var(--primary) !important;
+            background-color: rgba(99, 102, 241, 0.05) !important;
+        }
+    </style>
+</head>
+<body class="bg-navy text-text-primary font-sans antialiased overflow-x-hidden leading-relaxed">
+
+    <!-- NAVIGATION -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full h-[64px] flex items-center z-[100] bg-navy/60 backdrop-blur-xl border-b border-transparent transition-colors duration-300">
+        <div class="w-full max-w-[1000px] mx-auto px-6 flex justify-between items-center">
+            <a href="/" class="text-lg font-bold text-white no-underline flex items-center gap-2 tracking-tight">
+                <span class="w-4 h-4 bg-primary rounded-sm shadow-[0_0_10px_rgba(99,102,241,0.5)]"></span>
+                the wealth bean
+            </a>
+            <button class="modal-trigger bg-white text-navy font-bold text-xs py-2 px-4 rounded-md transition-transform hover:scale-105">Get Early Access</button>
+        </div>
+    </nav>
+
+    <!-- MAIN FUNNEL CONTAINER -->
+    <main class="relative pt-[120px] pb-16 min-h-screen flex flex-col">
+        <div class="bg-grid absolute inset-0 -z-10 pointer-events-none"></div>
+        <div class="hero-glow absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[600px] opacity-70 -z-10 pointer-events-none"></div>
+        
+        <div class="w-full max-w-[800px] mx-auto px-6 flex-1 flex flex-col">
+
+            <!-- VIEW CONTAINER -->
+            <div id="app-container" class="w-full flex-1">
+
+                <!-- 1. UPLOAD SECTION -->
+                <div id="view-upload" class="w-full transition-opacity duration-300">
+                    
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl md:text-4xl font-extrabold text-white leading-tight tracking-tight mb-2">
+                            Fix what’s actually holding you back
+                        </h1>
+                        <p class="text-[1rem] text-text-secondary font-medium mb-3">
+                            Upload your Zerodha P&L file and see exactly where you're losing money
+                        </p>
+                        <p class="text-xs font-bold text-text-secondary/70 uppercase tracking-wide mb-3">
+                            Console &rarr; Reports &rarr; P&L &rarr; Download (Excel)
+                        </p>
+                        <p class="text-xs font-bold text-primary uppercase tracking-wide">
+                            Takes 10 seconds • Your data is not stored
+                        </p>
+                    </div>
+
+                    <div id="dropzone" class="bg-card border-2 border-dashed border-border hover:border-primary/50 hover:bg-white/5 transition-all rounded-2xl p-10 md:p-14 text-center cursor-pointer shadow-[0_0_30px_rgba(99,102,241,0.03)] hover:shadow-[0_0_30px_rgba(99,102,241,0.1)] group">
+                        <div class="w-14 h-14 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                            <svg class="w-6 h-6 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-1">Drop your Zerodha P&L Excel file here</h3>
+                        <p class="text-sm text-text-secondary font-medium mb-6">or click to upload</p>
+                        
+                        <p id="upload-error" class="hidden text-danger text-xs font-bold bg-danger/10 py-2 px-3 rounded mb-4 inline-block"></p>
+                        
+                        <input type="file" id="file-input" class="hidden" accept=".xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+                    </div>
+                    <p class="text-center text-xs text-text-secondary/60 font-bold uppercase tracking-wider mt-4">
+                        Only .xlsx / .xls files supported (Max 10MB)
+                    </p>
+                </div>
+
+                <!-- 2. LOADING STATE -->
+                <div id="view-loading" class="w-full hidden flex-col items-center justify-center py-20 transition-opacity duration-300">
+                    <div class="relative w-16 h-16 mb-6">
+                        <div class="absolute inset-0 border-4 border-white/10 rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-primary rounded-full border-t-transparent animate-spin"></div>
+                    </div>
+                    <h3 class="text-xl font-bold text-white tracking-tight">Processing algorithmic analysis...</h3>
+                    <p class="text-sm text-text-secondary font-medium mt-2">Checking behavioral patterns and risk ratios.</p>
+                </div>
+
+                <!-- 3. RESULTS SECTION -->
+                <div id="view-results" class="w-full hidden opacity-0 translate-y-4 transition-all duration-500">
+
+                    <!-- Metrics Grid -->
+                    <div class="flex flex-wrap md:flex-nowrap gap-2 md:gap-3 mb-6 w-full mt-4">
+                        
+                        <!-- Gross P&L -->
+                        <div class="w-[calc(50%-0.25rem)] md:w-auto md:flex-auto bg-card border border-border rounded-xl p-3 sm:p-4 text-center shadow-[0_4px_20px_rgba(0,0,0,0.4)] flex flex-col justify-center min-w-0">
+                            <span class="block text-[10px] sm:text-xs text-text-secondary uppercase font-bold tracking-wider mb-1.5 truncate">Gross P&L</span>
+                            <span data-gross-pnl class="text-[clamp(1rem,3.5vw,1.25rem)] font-bold tracking-tight break-words">--</span>
+                        </div>
+
+                        <!-- Profit Dependency -->
+                        <div id="dependency-card" class="w-[calc(50%-0.25rem)] md:w-auto md:flex-auto bg-card border border-border rounded-xl p-3 sm:p-4 text-center shadow-[0_4px_20px_rgba(0,0,0,0.4)] flex flex-col justify-center min-w-0 transition-colors">
+                            <span class="block text-[10px] sm:text-xs text-text-secondary uppercase font-bold tracking-wider mb-1.5 truncate">Profit Dependency</span>
+                            <span data-profit-dependency class="text-[clamp(1rem,3.5vw,1.25rem)] font-bold text-white tracking-tight break-words leading-none">--%</span>
+                            <span class="block text-[9px] text-text-secondary/60 uppercase tracking-wider mt-1 truncate">From top 3 trades</span>
+                        </div>
+                        
+                        <!-- Charges Paid -->
+                        <div class="w-[calc(50%-0.25rem)] md:w-auto md:flex-auto bg-danger/5 border border-danger/20 rounded-xl p-3 sm:p-4 text-center shadow-[0_4px_20px_rgba(0,0,0,0.4)] flex flex-col justify-center min-w-0">
+                            <span class="block text-[10px] sm:text-xs text-danger uppercase font-bold tracking-wider mb-1.5 truncate">Charges Paid</span>
+                            <span data-charges class="text-[clamp(1rem,3.5vw,1.25rem)] font-bold text-danger tracking-tight break-words">--</span>
+                        </div>
+                        
+                        <!-- Net P&L (Emphasized) -->
+                        <div class="w-[calc(50%-0.25rem)] md:w-auto md:flex-auto bg-card border-2 border-primary/50 rounded-xl p-3 sm:p-4 text-center shadow-[0_0_30px_rgba(99,102,241,0.15)] relative flex flex-col justify-center min-w-0">
+                            <div class="absolute inset-0 bg-primary/5 rounded-xl pointer-events-none"></div>
+                            <span class="block text-[10px] sm:text-xs text-text-primary uppercase font-bold tracking-wider mb-1 relative z-10 truncate">Net P&L</span>
+                            <span data-net-pnl class="text-[clamp(1.1rem,4vw,1.5rem)] font-black tracking-tight relative z-10 break-words">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Reality Block (Micro Insight / Context) -->
+                    <div class="text-center mb-8">
+                        <p id="res-reality-block" class="text-lg md:text-xl font-bold text-text-secondary leading-snug mb-2">
+                            <!-- Injected via JS -->
+                        </p>
+                        <!-- Dynamic Summary Message placeholder -->
+                        <p id="res-summary-message" class="text-[11px] sm:text-xs font-bold uppercase tracking-wider"></p>
+                    </div>
+
+                    <!-- Trade Breakdown Progress Bars & Performance Metrics (Visible) -->
+                    <div id="res-trade-breakdown" class="bg-card border border-border rounded-xl p-5 md:p-6 mb-8 w-full max-w-[650px] mx-auto shadow-[0_4px_20px_rgba(0,0,0,0.2)] hidden">
+                    </div>
+
+                    <!-- Primary Insight (Partially Locked State) -->
+                    <div class="w-full max-w-[650px] mx-auto bg-card border border-border rounded-2xl p-6 md:p-8 mb-10 shadow-lg relative overflow-hidden text-center flex flex-col items-center">
+                        
+                        <!-- VISIBLE: Only the Headline / Point -->
+                        <span class="inline-block bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-md border border-primary/20 mb-4 z-10 relative">
+                            Core Observation
+                        </span>
+                        <h2 id="res-primary-title" class="text-xl md:text-2xl font-black text-white leading-snug tracking-tight mb-4 z-10 relative">
+                            Analyzing...
+                        </h2>
+                        
+                        <!-- BLURRED: The Description and Details -->
+                        <div class="relative w-full mt-2">
+                            <div class="blur-[4px] opacity-40 select-none pointer-events-none transition-all duration-500 pb-2">
+                                <p id="res-primary-desc" class="text-sm md:text-[0.95rem] text-text-secondary font-medium m-0 leading-relaxed max-w-[500px] mx-auto">
+                                    --
+                                </p>
+                                <!-- Fake structural details to make it look like a detailed report -->
+                                <div class="mt-4 flex flex-col gap-2 opacity-50">
+                                    <div class="h-8 bg-white/20 rounded-md w-full max-w-[400px] mx-auto"></div>
+                                    <div class="h-8 bg-white/20 rounded-md w-full max-w-[300px] mx-auto"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Lock Overlay -->
+                            <div class="absolute inset-0 flex flex-col items-center justify-center z-10">
+                                <button class="modal-trigger flex items-center gap-2 bg-primary/20 border border-primary/50 text-white font-bold text-sm py-2.5 px-6 rounded-full transition-all hover:bg-primary hover:scale-105 shadow-[0_0_20px_rgba(99,102,241,0.3)] backdrop-blur-md">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    Unlock Full Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- URGENCY TRANSITION & FINAL CTA -->
+                    <div class="text-center mb-6">
+                        <p id="cta-transition-1" class="text-[1.05rem] font-medium text-text-secondary mb-1">We found the exact behavioral patterns affecting your P&L.</p>
+                        <p id="cta-transition-2" class="text-[1.1rem] font-bold text-white">Join the early access and unlock your full report.</p>
+                    </div>
+
+                    <div class="bg-card border border-primary/20 rounded-xl p-8 text-center shadow-[0_0_40px_rgba(99,102,241,0.1)] max-w-[650px] mx-auto">
+                        <h3 id="cta-card-title" class="text-xl md:text-2xl font-extrabold text-white tracking-tight mb-6">Unlock Your Complete Behavioral Analysis</h3>
+                        
+                        <button class="modal-trigger w-full sm:w-auto bg-primary text-white font-bold text-[0.95rem] py-3.5 px-10 rounded-lg transition-all hover:bg-primary-hover hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5">
+                            Get Early Access
+                        </button>
+                        <p class="text-[10px] text-text-secondary/80 font-bold tracking-wide uppercase mt-4">Early users get 1 month Pro free</p>
+                    </div>
+                    
+                    <!-- Re-analyze button -->
+                    <div class="text-center mt-6">
+                        <button onclick="switchView('upload')" class="text-xs text-text-secondary hover:text-white font-semibold transition-colors underline underline-offset-4">Analyze another file</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- STEP 2 MODAL -->
+    <div id="waitlist-modal" class="modal-overlay fixed inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center opacity-0 invisible">
+        <div class="modal-container bg-card border border-border rounded-xl w-full max-w-[400px] p-8 relative transform translate-y-4 scale-95 shadow-[0_24px_80px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.05)] mx-4">
+            <button class="modal-close absolute top-4 right-4 bg-transparent border-none text-text-secondary text-2xl cursor-pointer transition-colors hover:text-white leading-none" id="modal-close">&times;</button>
+            
+            <h3 class="text-xl font-extrabold text-white tracking-tight mb-1">Secure your spot.</h3>
+            <p class="mb-1 text-sm text-text-secondary font-medium">Join the waitlist to get priority access when we launch.</p>
+            <p class="mb-6 text-[10px] uppercase font-bold tracking-wider text-text-secondary/60">Takes less than 30 seconds • No spam</p>
+            
+            <form id="waitlist-form">
+                <div class="mb-4 text-left">
+                    <label for="fullName" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" id="fullName" class="w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]" required placeholder="e.g. Rahul Kumar">
+                </div>
+
+                <div class="mb-4 text-left">
+                    <label for="email" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" id="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" class="w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]" required placeholder="trader@example.com">
+                </div>
+                
+                <div class="mb-4 text-left">
+                    <label for="tradingType" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Primary Trading Type <span class="text-danger">*</span></label>
+                    <select id="tradingType" class="select-field w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]" required>
+                        <option class="bg-card text-text-secondary" value="" disabled selected>Select your primary style</option>
+                        <option class="bg-card text-white" value="F&O">F&O (Futures & Options)</option>
+                        <option class="bg-card text-white" value="Equity">Equity Intraday</option>
+                        <option class="bg-card text-white" value="Options">Options Selling</option>
+                        <option class="bg-card text-white" value="Optionsb">Options Buying</option>
+                        <option class="bg-card text-white" value="Swing">Swing Trading</option>
+                        <option class="bg-card text-white" value="Investor">Investor</option>
+                    </select>
+                </div>
+                
+                <div class="mb-5 text-left">
+                    <label for="challenge" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Biggest Challenge (Optional)</label>
+                    <textarea id="challenge" class="w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)] resize-y" rows="3" placeholder="e.g., Overtrading, risk management..."></textarea>
+                </div>
+                
+                <div id="form-message" class="hidden p-2.5 rounded-lg mb-4 text-xs font-bold text-center"></div>
+                
+                <p class="text-[10px] font-bold uppercase tracking-wider text-text-secondary/70 text-center mb-3">Only serious traders. No signals. No spam.</p>
+                <button type="submit" class="w-full bg-primary text-white font-bold text-sm py-3.5 px-6 rounded-lg transition-all hover:bg-primary-hover hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]" id="submit-btn">Request Early Access</button>
+            </form>
+        </div>
+    </div>
+
+     <!-- FOOTER -->
+    <footer class="w-full border-t border-border/50 py-8 mt-12 bg-navy/80">
+        <div class="w-full max-w-[1000px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 opacity-70">
+                <span class="w-3 h-3 bg-primary rounded-sm shadow-[0_0_8px_rgba(99,102,241,0.4)]"></span>
+                <span class="text-sm font-bold text-white tracking-tight">the Wealth bean</span>
+            </div>
+            <p class="text-xs text-text-secondary/70 font-medium text-center md:text-left">
+                &copy; 2026 the wealth bean. All rights reserved.
+            </p>
+            <div class="flex gap-6 text-xs font-medium text-text-secondary/70">
+                <a href="#" class="hover:text-white transition-colors">Terms</a>
+                <a href="#" class="hover:text-white transition-colors">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVITY -->
+    <script>
+        // API Configuration - Hardcoded to exact localhost ports to fix networking errors
+        const NODE_API_BASE = 'http://localhost:5000';
+        const PYTHON_API_BASE = 'http://localhost:8000';
+            
+        const ENDPOINTS = {
+            interest: `${NODE_API_BASE}/api/waitlist`, // Corrected to hit the likely /api/waitlist route
+            analyze: `${PYTHON_API_BASE}/analyse/single`
+        };
+
+        // Sticky Navbar
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // --- UPLOAD & ANALYZE LOGIC ---
+        const viewUpload = document.getElementById('view-upload');
+        const viewLoading = document.getElementById('view-loading');
+        const viewResults = document.getElementById('view-results');
+        
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const uploadError = document.getElementById('upload-error');
+
+        function switchView(view) {
+            viewUpload.classList.add('hidden');
+            viewLoading.classList.add('hidden');
+            viewLoading.style.display = 'none';
+            viewResults.classList.add('hidden');
+            viewResults.classList.remove('opacity-100', 'translate-y-0');
+
+            if (view === 'upload') {
+                viewUpload.classList.remove('hidden');
+                fileInput.value = '';
+            } else if (view === 'loading') {
+                viewLoading.classList.remove('hidden');
+                viewLoading.style.display = 'flex';
+            } else if (view === 'results') {
+                viewResults.classList.remove('hidden');
+                void viewResults.offsetWidth;
+                viewResults.classList.add('opacity-100', 'translate-y-0');
+            }
+        }
+
+        function showError(msg) {
+            uploadError.textContent = msg;
+            uploadError.classList.remove('hidden');
+            switchView('upload');
+        }
+
+        function updateResultsUI(data) {
+            // Strictly enforce two decimal places for all currency values
+            const formatCurrency = (val) => {
+                const num = Number(val) || 0;
+                return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            };
+            
+            // Extract directly from Python FastAPI Response
+            const summary = data.summary || {};
+            const logicResults = data.logic_results || [];
+            const health = data.health || {};
+            const topMistakes = data.top_mistakes || [];
+            
+            const score = health.score || 0;
+            const totalImpact = data.total_estimated_impact_inr || 0;
+
+            // Find L2 logic which holds most fundamental execution metrics in Python
+            const l2Logic = logicResults.find(r => r.logic_id === 'L2') || {};
+            const l2Metrics = l2Logic.metrics || {};
+            const l2Evidence = l2Logic.evidence || {};
+
+            // 1. SAFELY Update High-Level Summary Cards
+            const grossPnlValue = summary.realized_pnl || 0;
+            const chargesValue = summary.charges_total || 0;
+            const netPnlValue = summary.net_pnl || 0;
+            
+            const grossPnlEl = document.querySelector('[data-gross-pnl]');
+            if (grossPnlEl) {
+                grossPnlEl.textContent = `₹${formatCurrency(grossPnlValue)}`;
+                grossPnlEl.className = `text-[clamp(1rem,3.5vw,1.25rem)] font-bold tracking-tight break-words ${grossPnlValue >= 0 ? 'text-accent' : 'text-danger'}`;
+            }
+
+            const chargesEl = document.querySelector('[data-charges]');
+            if (chargesEl) chargesEl.textContent = `₹${formatCurrency(chargesValue)}`;
+
+            const netPnlEl = document.querySelector('[data-net-pnl]');
+            if (netPnlEl) {
+                netPnlEl.textContent = `₹${formatCurrency(netPnlValue)}`;
+                netPnlEl.className = `text-[clamp(1.1rem,4vw,1.5rem)] font-black tracking-tight relative z-10 break-words ${netPnlValue >= 0 ? 'text-accent drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'text-danger drop-shadow-[0_0_15px_rgba(239,68,68,0.3)]'}`;
+            }
+
+            // 2. Execution Breakdown Stats
+            const total = l2Metrics.total_trades || 0;
+            const wins = l2Metrics.winners || 0;
+            const losses = l2Metrics.losers || 0;
+            const breakeven = l2Metrics.breakeven_trades || 0;
+            
+            const totalWinPnl = l2Metrics.gross_wins_inr || 0;
+            const totalLossPnl = l2Metrics.gross_losses_inr || 0;
+            const avgWin = l2Metrics.avg_winner_inr || 0;
+            const avgLoss = l2Metrics.avg_loser_inr || 0;
+            const rrRatio = l2Metrics.rr_ratio || 0;
+
+            let largestWin = 0;
+            let profitDependency = 0;
+            
+            if (l2Evidence.top_winners && l2Evidence.top_winners.length > 0) {
+                largestWin = l2Evidence.top_winners[0].realized_pnl;
+                const top3Profit = l2Evidence.top_winners.slice(0, 3).reduce((acc, t) => acc + t.realized_pnl, 0);
+                profitDependency = totalWinPnl > 0 ? Math.round((top3Profit / totalWinPnl) * 100) : 0;
+            }
+
+            let largestLoss = 0;
+            if (l2Evidence.top_losers && l2Evidence.top_losers.length > 0) {
+                largestLoss = l2Evidence.top_losers[0].realized_pnl;
+            }
+
+            // SAFELY Update Dependency Card
+            const depCard = document.getElementById('dependency-card');
+            const depEl = document.querySelector('[data-profit-dependency]');
+            if (depCard && depEl) {
+                depEl.textContent = `${profitDependency}%`;
+                if (profitDependency > 60) {
+                    depEl.classList.remove('text-white');
+                    depEl.classList.add('text-danger');
+                    depCard.classList.remove('border-border');
+                    depCard.classList.add('border-danger/30', 'bg-danger/5');
+                } else {
+                    depEl.classList.add('text-white');
+                    depEl.classList.remove('text-danger');
+                    depCard.classList.add('border-border');
+                    depCard.classList.remove('border-danger/30', 'bg-danger/5');
+                }
+            }
+
+            // SAFELY Render Progress Bars & Lower Cards
+            const breakdownContainer = document.getElementById('res-trade-breakdown');
+            if (breakdownContainer) {
+                const winPct = total > 0 ? (wins / total) * 100 : 0;
+                const lossPct = total > 0 ? (losses / total) * 100 : 0;
+                const breakPct = total > 0 ? (breakeven / total) * 100 : 0;
+
+                breakdownContainer.innerHTML = `
+                    <h4 class="text-[10px] sm:text-xs font-bold text-text-secondary uppercase tracking-wider mb-5 text-center">Execution Breakdown</h4>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-border/50 pb-3">
+                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Total Executions</span>
+                            <span class="text-sm font-black text-white">${total}</span>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-1.5">
+                                <span class="text-xs font-bold text-accent uppercase tracking-wider">Winning Trades</span>
+                                <span class="text-sm font-black text-white">${wins} <span class="text-[10px] text-text-secondary font-medium ml-1">(${winPct.toFixed(0)}%)</span></span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                                <div class="bg-accent h-full rounded-full transition-all duration-1000" style="width: ${winPct}%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-1.5">
+                                <span class="text-xs font-bold text-danger uppercase tracking-wider">Losing Trades</span>
+                                <span class="text-sm font-black text-white">${losses} <span class="text-[10px] text-text-secondary font-medium ml-1">(${lossPct.toFixed(0)}%)</span></span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                                <div class="bg-danger h-full rounded-full transition-all duration-1000" style="width: ${lossPct}%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-end mb-1.5">
+                                <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Breakeven / Scratch</span>
+                                <span class="text-sm font-black text-white">${breakeven} <span class="text-[10px] text-text-secondary font-medium ml-1">(${breakPct.toFixed(0)}%)</span></span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                                <div class="bg-text-secondary h-full rounded-full transition-all duration-1000" style="width: ${breakPct}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Good vs The Bad Metrics -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-5 border-t border-border/50">
+                        <div class="bg-accent/5 border border-accent/20 rounded-xl p-4">
+                            <span class="block text-[10px] text-accent font-bold uppercase tracking-widest mb-3 text-center">The Good</span>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center"><span class="text-xs text-text-secondary">Avg Win</span><span class="text-sm font-bold text-white">₹${formatCurrency(avgWin)}</span></div>
+                                <div class="flex justify-between items-center"><span class="text-xs text-text-secondary">Highest Win</span><span class="text-sm font-bold text-white">₹${formatCurrency(largestWin)}</span></div>
+                                <div class="flex justify-between items-center pt-2 border-t border-white/5"><span class="text-xs text-text-secondary">Total Gross Profit</span><span class="text-sm font-black text-accent">₹${formatCurrency(totalWinPnl)}</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-danger/5 border border-danger/20 rounded-xl p-4">
+                            <span class="block text-[10px] text-danger font-bold uppercase tracking-widest mb-3 text-center">The Bad</span>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center"><span class="text-xs text-text-secondary">Avg Loss</span><span class="text-sm font-bold text-white">₹${formatCurrency(Math.abs(avgLoss))}</span></div>
+                                <div class="flex justify-between items-center"><span class="text-xs text-text-secondary">Highest Loss</span><span class="text-sm font-bold text-white">₹${formatCurrency(Math.abs(largestLoss))}</span></div>
+                                <div class="flex justify-between items-center pt-2 border-t border-white/5"><span class="text-xs text-text-secondary">Total Gross Loss</span><span class="text-sm font-black text-danger">₹${formatCurrency(Math.abs(totalLossPnl))}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- RR Ratio -->
+                    <div class="mt-4 bg-white/5 border border-border/50 rounded-xl p-4 flex justify-between items-center">
+                        <div>
+                            <span class="block text-[10px] text-text-secondary uppercase font-bold tracking-wider mb-0.5">Reward-to-Risk Ratio</span>
+                            <span class="text-xs text-text-secondary/70">Average Win ÷ Average Loss</span>
+                        </div>
+                        <span class="text-xl font-black ${rrRatio >= 1.5 ? 'text-accent' : rrRatio >= 1 ? 'text-warning' : 'text-danger'}">${rrRatio > 999 ? '∞' : rrRatio.toFixed(2)}x</span>
+                    </div>
+                `;
+                breakdownContainer.classList.remove('hidden');
+            }
+
+            // 3. SAFELY Update Reality Block 
+            const realityBlockText = document.getElementById('res-reality-block');
+            if (realityBlockText) {
+                if (grossPnlValue >= 0) {
+                    if (netPnlValue < 0) {
+                        realityBlockText.innerHTML = `You made <span class="text-white">₹${formatCurrency(grossPnlValue)}</span><br>But charges turned it into a <span class="text-danger">₹${formatCurrency(Math.abs(netPnlValue))}</span> loss.`;
+                    } else {
+                        const keptPrefix = (netPnlValue > grossPnlValue * 0.7) ? "And kept" : "But kept only";
+                        realityBlockText.innerHTML = `You made <span class="text-white">₹${formatCurrency(grossPnlValue)}</span><br>${keptPrefix} <span class="text-accent">₹${formatCurrency(netPnlValue)}</span> after charges.`;
+                    }
+                } else {
+                    realityBlockText.innerHTML = `You lost <span class="text-danger">₹${formatCurrency(Math.abs(grossPnlValue))}</span><br>And it worsened to <span class="text-danger">₹${formatCurrency(Math.abs(netPnlValue))}</span> after charges.`;
+                }
+            }
+            
+            // SAFELY Update Dynamic Summary Message
+            const summaryMsgEl = document.getElementById('res-summary-message');
+            const chargeImpact = grossPnlValue > 0 ? chargesValue / grossPnlValue : 0;
+            let message = "";
+            
+            if (summaryMsgEl) {
+                if (netPnlValue < 0) {
+                    message = "You are losing money after costs. Your current approach is not working.";
+                    summaryMsgEl.className = "text-[11px] sm:text-xs font-bold text-danger uppercase tracking-wider";
+                } else if (netPnlValue > 0 && chargeImpact > 0.3) {
+                    message = "You are profitable, but a large portion is lost to charges. This is slowing your growth.";
+                    summaryMsgEl.className = "text-[11px] sm:text-xs font-bold text-warning uppercase tracking-wider";
+                } else if (netPnlValue > 0 && chargeImpact <= 0.3) {
+                    message = "You are profitable. Your current approach is working.";
+                    summaryMsgEl.className = "text-[11px] sm:text-xs font-bold text-accent uppercase tracking-wider";
+                }
+                
+                if (netPnlValue > grossPnlValue * 0.7) {
+                    message = "You are managing costs efficiently and keeping most of your profits.";
+                    summaryMsgEl.className = "text-[11px] sm:text-xs font-bold text-accent uppercase tracking-wider";
+                }
+                summaryMsgEl.textContent = message;
+            }
+
+            // SAFELY Update Dynamic CTA Transition and Title for CLIFFHANGER
+            const cta1 = document.getElementById('cta-transition-1');
+            const cta2 = document.getElementById('cta-transition-2');
+            const ctaCardTitle = document.getElementById('cta-card-title');
+            
+            if (cta1 && cta2 && ctaCardTitle) {
+                // Unified CTA to push unlocking the full report
+                cta1.textContent = "We found the exact behavioral patterns affecting your P&L.";
+                cta2.textContent = "Join the early access and unlock your full report.";
+                ctaCardTitle.textContent = "Unlock Your Complete Behavioral Analysis";
+            }
+
+            // 4. SAFELY Render Primary Insight
+            const insights = [];
+            
+            if (score >= 85) {
+                insights.push({
+                    title: "Excellent Execution. Your approach is working.",
+                    desc: "Maintain your discipline. Focus on scaling your edge without increasing risk proportionally."
+                });
+            }
+
+            topMistakes.slice(0, 2).forEach(m => {
+                insights.push({
+                    title: m.headline,
+                    desc: m.recommendation
+                });
+            });
+
+            if (insights.length === 0) {
+                insights.push({
+                    title: "Stable Execution Profile",
+                    desc: "No critical behavioral or algorithmic mistakes were detected in this trading period."
+                });
+            }
+
+            const primaryTitleEl = document.getElementById('res-primary-title');
+            const primaryDescEl = document.getElementById('res-primary-desc');
+            if (primaryTitleEl && primaryDescEl && insights.length > 0) {
+                const primary = insights[0];
+                primaryTitleEl.textContent = primary.title;
+                primaryDescEl.textContent = primary.desc;
+            }
+
+            switchView('results');
+        }
+
+        async function handleFileUpload(file) {
+            uploadError.classList.add('hidden');
+            if (!file) return;
+            
+            if (!file.name.toLowerCase().endsWith('.xlsx') && !file.name.toLowerCase().endsWith('.xls') && file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                showError("Invalid format. Please upload a Zerodha P&L Excel file (.xlsx or .xls).");
+                return;
+            }
+
+            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit for python backend
+            if (file.size > MAX_FILE_SIZE) {
+                showError("File is too large. Please upload an Excel file smaller than 10MB.");
+                return;
+            }
+
+            switchView('loading');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch(ENDPOINTS.analyze, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    showError(errData.detail || errData.message || "Could not analyze this file. Make sure it is a full Zerodha P&L export.");
+                    return;
+                }
+
+                const data = await res.json();
+                updateResultsUI(data);
+                attachModalTriggers();
+
+            } catch (err) {
+                console.error("Fetch error: ", err);
+                showError("Failed to connect to the analysis engine. Is your Python server running on port 8000?");
+            }
+        }
+
+        // Dropzone Events
+        dropzone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFileUpload(e.target.files[0]));
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-active'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => dropzone.classList.remove('drag-active'), false);
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            handleFileUpload(e.dataTransfer.files[0]);
+        });
+
+        // --- WAITLIST MODAL LOGIC ---
+        const modal = document.getElementById('waitlist-modal');
+        const modalClose = document.getElementById('modal-close');
+        const waitlistForm = document.getElementById('waitlist-form');
+        const formMessage = document.getElementById('form-message');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        const attachModalTriggers = () => {
+            const modalTriggers = document.querySelectorAll('.modal-trigger');
+            modalTriggers.forEach(trigger => {
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                newTrigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    modal.classList.remove('invisible');
+                    setTimeout(() => modal.classList.add('active'), 10);
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+        };
+        attachModalTriggers();
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.classList.add('invisible');
+                document.body.style.overflow = '';
+                formMessage.className = 'hidden';
+                if(!formMessage.classList.contains('text-accent')) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.textContent = 'Request Early Access';
+                }
+            }, 200);
+        };
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) closeModal();
+        });
+
+        waitlistForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const tradingType = document.getElementById('tradingType').value;
+            const challenge = document.getElementById('challenge').value.trim();
+
+            if (!fullName || !email || !tradingType) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Joining...';
+            submitBtn.style.opacity = '0.7';
+            formMessage.className = 'hidden';
+
+            try {
+                const response = await fetch(ENDPOINTS.interest, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, tradingType, challenge })
+                });
+
+                // Attempt to extract JSON from response to surface specific server errors
+                let responseData = {};
+                try {
+                    responseData = await response.json();
+                } catch (err) {}
+
+                if (response.ok) {
+                    formMessage.textContent = "You're on the list. Check your email.";
+                    formMessage.className = 'block p-2.5 rounded-lg mb-4 text-xs font-bold text-center bg-accent/10 text-accent border border-accent/20';
+                    waitlistForm.reset();
+                    submitBtn.textContent = "You're in 🚀";
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.7';
+                } else if (response.status === 409) {
+                    formMessage.textContent = responseData.message || "You are already on the early access list.";
+                    formMessage.className = 'block p-2.5 rounded-lg mb-4 text-xs font-bold text-center bg-danger/10 text-danger border border-danger/20';
+                } else if (response.status === 404) {
+                    // Explicitly catch the 404 to help the user debug their local setup
+                    throw new Error("API Route not found (404). Ensure 'server.js' is currently running on Port 5000 (Check that you didn't run tradebook.js or a Python file on Port 5000 by mistake).");
+                } else {
+                    // Throw the exact backend message so the catch block displays it
+                    const errorMsg = responseData.error?.message || responseData.error || responseData.message || `Server Error (${response.status})`;
+                    throw new Error(errorMsg);
+                }
+            } catch (error) {
+                console.error("Submission error:", error);
+                
+                const errMsg = error.message || "";
+                
+                // Explicitly intercept Network Errors to give actionable advice
+                if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError')) {
+                    formMessage.textContent = "Cannot connect to backend. Is Node server.js running on port 5000?";
+                } else if (errMsg.includes('duplicate key') || errMsg.includes('waitlist_email_key')) {
+                    formMessage.textContent = "You are already on the early access list.";
+                } else {
+                    // Display the true error from the server instead of generic "Something went wrong"
+                    formMessage.textContent = errMsg || "Something went wrong. Try again.";
+                }
+                
+                formMessage.className = 'block p-2.5 rounded-lg mb-4 text-xs font-bold text-center bg-danger/10 text-danger border border-danger/20';
+            } finally {
+                if(!formMessage.classList.contains('text-accent')) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.textContent = 'Request Early Access';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

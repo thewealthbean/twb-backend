@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>the wealth bean | Fix Your Trading Mistakes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#030508',
+                        primary: '#6366F1',
+                        'primary-hover': '#4F46E5',
+                        accent: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                        purple: '#8B5CF6',
+                        'text-primary': '#F9FAFB',
+                        'text-secondary': '#9CA3AF',
+                        card: '#0B0E14',
+                        border: 'rgba(255, 255, 255, 0.08)',
+                        'border-hover': 'rgba(255, 255, 255, 0.15)',
+                        glow: 'rgba(99, 102, 241, 0.2)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        
+        .bg-grid {
+            background-size: 32px 32px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 80%);
+        }
+
+        .hero-glow {
+            background: radial-gradient(circle, var(--glow) 0%, rgba(3, 5, 8, 0) 60%);
+        }
+
+        nav.scrolled { border-bottom-color: rgba(255, 255, 255, 0.08); background: rgba(3, 5, 8, 0.85); }
+        
+        .modal-overlay { transition: opacity 0.2s, visibility 0.2s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-container { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active .modal-container { transform: translateY(0) scale(1); }
+
+        .select-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+        }
+
+        /* Scroll Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+    </style>
+</head>
+<body class="bg-navy text-text-primary font-sans antialiased overflow-x-hidden leading-relaxed flex flex-col min-h-screen">
+
+    <!-- NAVIGATION -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full h-[64px] flex items-center z-[100] bg-navy/60 backdrop-blur-xl border-b border-transparent transition-colors duration-300">
+        <div class="w-full max-w-[1000px] mx-auto px-6 flex justify-between items-center">
+            <a href="#" class="text-lg font-bold text-white no-underline flex items-center gap-2 tracking-tight">
+                <span class="w-4 h-4 bg-primary rounded-sm shadow-[0_0_10px_rgba(99,102,241,0.5)]"></span>
+                the wealth bean
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="analyze.html" class="text-sm font-medium text-text-secondary hover:text-white transition-colors hidden sm:block">Analyze P&L</a>
+                <button class="modal-trigger bg-white text-navy font-bold text-xs py-2 px-4 rounded-md transition-transform hover:scale-105">Get Early Access</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN FUNNEL CONTAINER -->
+    <main class="relative pt-[140px] pb-16 flex-1 flex flex-col">
+        <div class="bg-grid absolute inset-0 -z-10 pointer-events-none"></div>
+        <div class="hero-glow absolute top-0 left-1/2 -translate-x-1/2 w-[90vw] h-[700px] opacity-60 -z-10 pointer-events-none"></div>
+        
+        <div class="w-full max-w-[1000px] mx-auto px-6 flex flex-col items-center">
+            
+            <!-- 1. HERO SECTION -->
+            <div class="text-center mb-20 max-w-[800px] mx-auto">
+                <div class="inline-block bg-primary/10 border border-primary/20 rounded-full py-1.5 px-4 mb-6">
+                    <span class="text-xs font-bold text-primary uppercase tracking-widest">Analysis Engine v1.0 Live</span>
+                </div>
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight mb-6 reveal active">
+                    Stop losing money to the same mistakes.
+                </h1>
+                
+                <p class="text-lg md:text-xl text-text-secondary font-medium mb-10 max-w-[600px] mx-auto reveal active delay-100">
+                    Your last 20 trades already show your biggest mistake.<br>
+                    You just haven’t seen it yet.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-5 reveal active delay-200">
+                    <button class="modal-trigger w-full sm:w-auto bg-primary text-white font-black text-lg py-4 px-10 rounded-xl transition-all hover:scale-[1.03] shadow-[0_0_30px_rgba(99,102,241,0.5)] hover:shadow-[0_0_50px_rgba(99,102,241,0.7)]">
+                        Get Early Access
+                    </button>
+                    <!-- GLOWING TRY ENGINE FREE BUTTON -->
+                    <a href="analyze.html" class="w-full sm:w-auto bg-card border border-primary/40 hover:border-primary/70 text-white font-bold text-lg py-4 px-10 rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.2)] hover:shadow-[0_0_30px_rgba(99,102,241,0.4)]">
+                        Try Engine Free
+                    </a>
+                </div>
+
+                <!-- 2. WAITLIST SOCIAL PROOF -->
+                <div class="flex items-center justify-center gap-3 mt-8 reveal active delay-300">
+                    <!-- Avatars -->
+                    <span class="flex -space-x-2" id="waitlist-avatars">
+                        <div class="w-7 h-7 rounded-full bg-card border-2 border-primary/50 flex items-center justify-center text-[10px] font-bold text-primary shadow-[0_0_15px_rgba(99,102,241,0.3)] relative">-</div>
+                    </span>
+                    <!-- Count -->
+                    <span id="waitlist-count" class="text-sm text-text-secondary font-medium">
+                        0 traders waitlisted
+                    </span>
+                </div>
+            </div>
+
+            <!-- 5. PRODUCT PREVIEW SECTION -->
+            <div class="w-full max-w-[800px] mx-auto mb-24 relative group reveal">
+                <div class="absolute -inset-1 bg-gradient-to-r from-danger/40 to-primary/40 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative bg-card border-2 border-danger/40 rounded-2xl p-10 md:p-14 text-center shadow-[0_0_40px_rgba(239,68,68,0.15)] hover:shadow-[0_0_60px_rgba(239,68,68,0.25)] transition-all overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-danger/0 via-danger to-danger/0"></div>
+                    <span class="inline-block bg-danger/10 text-danger text-[10px] sm:text-xs font-black uppercase tracking-widest py-1.5 px-4 rounded-md mb-6 border border-danger/20">
+                        Critical Pattern Detected
+                    </span>
+                    <h2 class="text-2xl md:text-4xl font-black text-white leading-tight tracking-tight m-0">
+                        "After 2 losing trades, you took 5 more trades.<br>
+                        All of them lost."
+                    </h2>
+                </div>
+            </div>
+
+            <!-- 3. PROBLEM SECTION (PERSONALIZED) -->
+            <div class="w-full mb-24 reveal">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Why you aren't profitable yet</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[900px] mx-auto">
+                    <div class="bg-card border border-danger/20 rounded-xl p-8 hover:bg-danger/5 transition-colors shadow-[0_0_20px_rgba(239,68,68,0.05)] hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-danger/50 group-hover:bg-danger transition-colors"></div>
+                        <h3 class="text-xl font-bold text-white mb-2 tracking-tight">You took a loss… and entered another trade within minutes.</h3>
+                    </div>
+                    <div class="bg-card border border-danger/20 rounded-xl p-8 hover:bg-danger/5 transition-colors shadow-[0_0_20px_rgba(239,68,68,0.05)] hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-danger/50 group-hover:bg-danger transition-colors"></div>
+                        <h3 class="text-xl font-bold text-white mb-2 tracking-tight">You ignored your stop loss when the trade went against you.</h3>
+                    </div>
+                    <div class="bg-card border border-danger/20 rounded-xl p-8 hover:bg-danger/5 transition-colors shadow-[0_0_20px_rgba(239,68,68,0.05)] hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-danger/50 group-hover:bg-danger transition-colors"></div>
+                        <h3 class="text-xl font-bold text-white mb-2 tracking-tight">You don’t review your trades — so you repeat the same mistakes.</h3>
+                    </div>
+                    <div class="bg-card border border-danger/20 rounded-xl p-8 hover:bg-danger/5 transition-colors shadow-[0_0_20px_rgba(239,68,68,0.05)] hover:shadow-[0_0_30px_rgba(239,68,68,0.15)] relative overflow-hidden group">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-danger/50 group-hover:bg-danger transition-colors"></div>
+                        <h3 class="text-xl font-bold text-white mb-2 tracking-tight">You made the same mistake again… just in a different trade.</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. SOLUTION SECTION (OUTCOME BASED) -->
+            <div class="w-full mb-24 reveal">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">How we fix your trading</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center md:text-left">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 mx-auto md:mx-0 border border-primary/20">
+                            <span class="text-primary font-black text-xl">1</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3 tracking-tight">Show exactly where you lose money</h3>
+                        <p class="text-text-secondary text-sm">Upload your raw tradebook. We calculate your hidden psychological leaks automatically.</p>
+                    </div>
+                    <div class="text-center md:text-left delay-100">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 mx-auto md:mx-0 border border-primary/20">
+                            <span class="text-primary font-black text-xl">2</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3 tracking-tight">Expose the pattern you keep repeating</h3>
+                        <p class="text-text-secondary text-sm">See high-confidence alerts matching exactly when and why your setups fail.</p>
+                    </div>
+                    <div class="text-center md:text-left delay-200">
+                        <div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-6 mx-auto md:mx-0 border border-primary/20">
+                            <span class="text-primary font-black text-xl">3</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3 tracking-tight">Force you to stop making that mistake</h3>
+                        <p class="text-text-secondary text-sm">Get strict, actionable rules for tomorrow based purely on your own execution data.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. COMMUNITY SECTION -->
+            <div class="w-full max-w-[700px] mx-auto mb-24 reveal">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3">A Community Built on Proof, Not Claims</h2>
+                    <p class="text-lg text-text-secondary font-medium">See real traders. Real trades. Real performance.</p>
+                </div>
+
+                <!-- Mini Dashboard Mockup -->
+                <div class="bg-card/50 border border-border/60 rounded-2xl p-4 sm:p-6 shadow-[0_0_40px_rgba(0,0,0,0.3)] backdrop-blur-sm relative">
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                    
+                    <div class="flex flex-col gap-3">
+                        <!-- Trader 1 -->
+                        <div class="bg-card border border-border/40 hover:border-border/80 transition-colors rounded-xl p-5 relative">
+                            <div class="absolute top-5 right-5 flex items-center gap-1 bg-accent/10 px-2 py-1 rounded border border-accent/20">
+                                <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-[9px] text-accent font-bold uppercase tracking-wider hidden sm:inline-block">Verified Trade</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-sm shrink-0">RK</div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-white font-bold text-sm">R. Kumar</span>
+                                        <span class="text-[9px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span>Verified Trader</span>
+                                    </div>
+                                    <span class="text-accent text-xs font-bold">+₹12,450 this week</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy/50 border border-white/5 rounded-lg px-4 py-3 flex justify-between items-center">
+                                <span class="text-xs text-text-secondary font-medium">NIFTY 19800 CE &nbsp;&nbsp; Buy &rarr; Sell</span>
+                                <span class="text-accent font-bold text-sm">+₹2,150</span>
+                            </div>
+                        </div>
+
+                        <!-- Trader 2 -->
+                        <div class="bg-card border border-border/40 hover:border-border/80 transition-colors rounded-xl p-5 relative">
+                            <div class="absolute top-5 right-5 flex items-center gap-1 bg-accent/10 px-2 py-1 rounded border border-accent/20">
+                                <svg class="w-3 h-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                <span class="text-[9px] text-accent font-bold uppercase tracking-wider hidden sm:inline-block">Verified Trade</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-purple/20 border border-purple/30 flex items-center justify-center text-purple font-bold text-sm shrink-0">SD</div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-white font-bold text-sm">S. Desai</span>
+                                        <span class="text-[9px] text-text-secondary font-bold uppercase tracking-wider flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-accent"></span>Verified Trader</span>
+                                    </div>
+                                    <span class="text-accent text-xs font-bold">+₹8,900 this week</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-navy/50 border border-white/5 rounded-lg px-4 py-3 flex justify-between items-center">
+                                <span class="text-xs text-text-secondary font-medium">BANKNIFTY 48000 PE &nbsp;&nbsp; Buy &rarr; Sell</span>
+                                <span class="text-accent font-bold text-sm">+₹1,850</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Micro Trust Line -->
+                    <p class="text-[10px] font-bold text-text-secondary/60 uppercase tracking-widest mt-5 text-center">
+                        No screenshots. Every trade is verified.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 7 & 8. FINAL CTA -->
+            <div class="w-full max-w-[700px] mx-auto bg-card border border-primary/30 rounded-2xl p-10 md:p-14 text-center shadow-[0_0_50px_rgba(99,102,241,0.15)] relative overflow-hidden reveal">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-primary/20 blur-[50px] -z-10"></div>
+                
+                <p class="text-accent font-bold uppercase tracking-widest text-[11px] mb-4">
+                    Stop repeating the same cycle. Spots are closing soon.
+                </p>
+                <h2 class="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight mb-8">
+                    Your next trade will follow the same pattern.<br>Unless you fix it now.
+                </h2>
+                
+                <button class="modal-trigger w-full sm:w-auto bg-primary text-white font-black text-lg py-4 px-12 rounded-xl transition-all hover:scale-[1.03] shadow-[0_0_30px_rgba(99,102,241,0.5)] hover:shadow-[0_0_50px_rgba(99,102,241,0.8)]">
+                    Get Early Access
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="w-full border-t border-border/50 py-8 mt-12 bg-navy/80">
+        <div class="w-full max-w-[1000px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 opacity-70">
+                <span class="w-3 h-3 bg-primary rounded-sm shadow-[0_0_8px_rgba(99,102,241,0.4)]"></span>
+                <span class="text-sm font-bold text-white tracking-tight">the wealth bean</span>
+            </div>
+            <p class="text-xs text-text-secondary/70 font-medium text-center md:text-left">
+                &copy; 2026 the wealth bean. All rights reserved.
+            </p>
+            <div class="flex gap-6 text-xs font-medium text-text-secondary/70">
+                <a href="#" class="hover:text-white transition-colors">Terms</a>
+                <a href="#" class="hover:text-white transition-colors">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WAITLIST MODAL -->
+    <div id="waitlist-modal" class="modal-overlay fixed inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-[1000] flex items-center justify-center opacity-0 invisible">
+        <div class="modal-container bg-card border border-border rounded-xl w-full max-w-[400px] p-8 relative transform translate-y-4 scale-95 shadow-[0_24px_80px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.05)] mx-4">
+            <button class="modal-close absolute top-4 right-4 bg-transparent border-none text-text-secondary text-2xl cursor-pointer transition-colors hover:text-white leading-none" id="modal-close">&times;</button>
+            
+            <h3 class="text-xl font-extrabold text-white tracking-tight mb-1">Secure your spot.</h3>
+            <p class="mb-1 text-sm text-text-secondary font-medium">Join the waitlist to get priority access when we launch.</p>
+            <p class="mb-6 text-[10px] uppercase font-bold tracking-wider text-text-secondary/60">Takes less than 30 seconds • No spam</p>
+            
+            <form id="waitlist-form">
+                <div class="mb-4 text-left">
+                    <label for="fullName" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" id="fullName" class="w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]" required placeholder="e.g. Rahul Kumar">
+                </div>
+
+                <div class="mb-4 text-left">
+                    <label for="email" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" id="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" class="w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]" required placeholder="trader@example.com">
+                </div>
+                
+                <div class="mb-4 text-left">
+                    <label for="tradingType" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Primary Trading Type <span class="text-danger">*</span></label>
+                    <select id="tradingType" class="select-field w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]" required>
+                        <option class="bg-card text-text-secondary" value="" disabled selected>Select your primary style</option>
+                        <option class="bg-card text-white" value="F&O">F&O (Futures & Options)</option>
+                        <option class="bg-card text-white" value="Equity">Equity Intraday</option>
+                        <option class="bg-card text-white" value="Options">Options Selling</option>
+                        <option class="bg-card text-white" value="Optionsb">Options Buying</option>
+                        <option class="bg-card text-white" value="Swing">Swing Trading</option>
+                        <option class="bg-card text-white" value="Investor">Investor</option>
+                    </select>
+                </div>
+                
+                <div class="mb-5 text-left">
+                    <label for="challenge" class="block text-xs font-bold text-text-secondary mb-1.5 uppercase tracking-wide">Biggest Challenge (Optional)</label>
+                    <textarea id="challenge" class="w-full bg-white/5 border border-border rounded-lg py-2.5 px-3 text-white text-sm font-medium transition-colors focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(99,102,241,0.2)] resize-y" rows="2" placeholder="e.g., Overtrading, risk management..."></textarea>
+                </div>
+                
+                <div id="form-message" class="hidden p-2.5 rounded-lg mb-4 text-xs font-bold text-center"></div>
+                
+                <p class="text-[10px] font-bold uppercase tracking-wider text-text-secondary/70 text-center mb-3">Only serious traders. No signals. No spam.</p>
+                <button type="submit" class="w-full bg-primary text-white font-bold text-sm py-3.5 px-6 rounded-lg transition-all hover:bg-primary-hover hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]" id="submit-btn">Join Early Access</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- INTERACTIVITY -->
+    <script>
+        // Use port 5000 directly matching the server.js live backend
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:5000' 
+            : '';
+            
+        const ENDPOINTS = {
+            interest: `${API_BASE}/api/waitlist`,
+            stats: `${API_BASE}/api/stats`
+        };
+
+        // Scroll Animations using Intersection Observer
+        const revealElements = document.querySelectorAll('.reveal:not(.active)');
+        
+        const revealCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target); // Only animate once
+                }
+            });
+        };
+
+        const revealOptions = {
+            root: null,
+            threshold: 0.15,
+            rootMargin: "0px 0px -50px 0px"
+        };
+
+        const revealObserver = new IntersectionObserver(revealCallback, revealOptions);
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // Sticky Navbar
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // --- WAITLIST STATS LOGIC ---
+        async function fetchStats() {
+            try {
+                let data = { count: 0, recent: ['-'] }; // Set explicit default fallback to zero
+                
+                try {
+                    const res = await fetch(ENDPOINTS.stats);
+                    if (res.ok) {
+                        const apiData = await res.json();
+                        if (apiData && typeof apiData.count !== 'undefined') {
+                            data.count = apiData.count;
+                            // Ensure we catch the single-character initials from the live backend
+                            if (apiData.recentInitials && apiData.recentInitials.length > 0) {
+                                data.recent = apiData.recentInitials;
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.log("Using fallback stats data.");
+                }
+
+                // Update Count
+                const countEl = document.getElementById('waitlist-count');
+                if(countEl) {
+                    countEl.textContent = `${(data.count || 0).toLocaleString()} traders waitlisted`;
+                }
+
+                // Update Avatars (With Glowing Borders)
+                const avatarContainer = document.getElementById('waitlist-avatars');
+                if(avatarContainer) {
+                    avatarContainer.innerHTML = ''; 
+                    
+                    const initials = data.recent || ['-'];
+                    initials.slice(0, 4).forEach(initial => {
+                        const div = document.createElement('div');
+                        // Ensures initials (whether 1 char or 2) look perfect in the circular container
+                        div.className = "w-7 h-7 rounded-full bg-card border-2 border-primary/50 flex items-center justify-center text-[10px] font-bold text-primary shadow-[0_0_15px_rgba(99,102,241,0.3)] relative";
+                        div.textContent = initial;
+                        avatarContainer.appendChild(div);
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch waitlist stats:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchStats);
+
+        // --- WAITLIST MODAL LOGIC ---
+        const modal = document.getElementById('waitlist-modal');
+        const modalClose = document.getElementById('modal-close');
+        const waitlistForm = document.getElementById('waitlist-form');
+        const formMessage = document.getElementById('form-message');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        const attachModalTriggers = () => {
+            const modalTriggers = document.querySelectorAll('.modal-trigger');
+            modalTriggers.forEach(trigger => {
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                newTrigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    modal.classList.remove('invisible');
+                    setTimeout(() => modal.classList.add('active'), 10);
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+        };
+        attachModalTriggers();
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.classList.add('invisible');
+                document.body.style.overflow = '';
+                formMessage.className = 'hidden';
+                if(!formMessage.classList.contains('text-accent')) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.textContent = 'Join Early Access';
+                }
+            }, 200);
+        };
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if(e.target === modal) closeModal();
+        });
+
+        waitlistForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const tradingType = document.getElementById('tradingType').value;
+            const challenge = document.getElementById('challenge').value.trim();
+
+            if (!fullName || !email || !tradingType) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Joining...';
+            submitBtn.style.opacity = '0.7';
+            formMessage.className = 'hidden';
+
+            try {
+                const response = await fetch(ENDPOINTS.interest, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, tradingType, challenge })
+                });
+
+                if (response.ok) {
+                    formMessage.textContent = "You're on the list. Check your email.";
+                    formMessage.className = 'block p-2.5 rounded-lg mb-4 text-xs font-bold text-center bg-accent/10 text-accent border border-accent/20';
+                    waitlistForm.reset();
+                    submitBtn.textContent = "You're in 🚀";
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.7';
+                    
+                    fetchStats(); // Instantly update avatar/count!
+                } else if (response.status === 409) {
+                    formMessage.textContent = "You are already on the early access list.";
+                    formMessage.className = 'block p-2.5 rounded-lg mb-4 text-xs font-bold text-center bg-danger/10 text-danger border border-danger/20';
+                } else {
+                    throw new Error('Server returned ' + response.status);
+                }
+            } catch (error) {
+                console.error("Submission error:", error);
+                formMessage.textContent = "Something went wrong. Try again.";
+                formMessage.className = 'block p-2.5 rounded-lg mb-4 text-xs font-bold text-center bg-danger/10 text-danger border border-danger/20';
+            } finally {
+                if(!formMessage.classList.contains('text-accent')) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.textContent = 'Join Early Access';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
