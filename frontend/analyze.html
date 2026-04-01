@@ -315,12 +315,12 @@
     <!-- INTERACTIVITY -->
     <script>
         // API Configuration - Hardcoded to exact localhost ports to fix networking errors
-        const NODE_API_BASE = 'http://localhost:5000';
-        const PYTHON_API_BASE = 'http://localhost:8000';
+        const NODE_API_BASE = 'https://twb-backend.onrender.com';
+        const PYTHON_API_BASE = 'https://twb-python-engine.onrender.com';
             
         const ENDPOINTS = {
             interest: `${NODE_API_BASE}/api/waitlist`, // Corrected to hit the likely /api/waitlist route
-            analyze: `${PYTHON_API_BASE}/analyse/single`
+            analyze: `${NODE_API_BASE}/api/analyze`
         };
 
         // Sticky Navbar

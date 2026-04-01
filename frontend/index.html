@@ -366,9 +366,9 @@
     <!-- INTERACTIVITY -->
     <script>
         // Use port 5000 directly matching the server.js live backend
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://localhost:5000' 
-            : '';
+        const API_BASE = window.location.hostname.includes('localhost')
+            ? 'http://localhost:5000'
+            : 'https://twb-backend.onrender.com';
             
         const ENDPOINTS = {
             interest: `${API_BASE}/api/waitlist`,
