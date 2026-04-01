@@ -153,42 +153,42 @@ app.post('/api/waitlist', async (req, res) => {
 // ================================
 app.post('/api/analyze', upload.single('file'), async (req, res) => {
   try {
-    // ✅ 1. Validate file
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    // ✅ 2. Prepare form-data
-    const form = new FormData();
-    form.append('file', fs.createReadStream(req.file.path));
+    console.log("Uploading:", req.file.originalname);
 
-    // ✅ 3. Call Python API
+    const form = new FormData();
+    form.append(
+      'file',
+      fs.createReadStream(req.file.path),
+      req.file.originalname
+    );
+
     const response = await axios.post(
       'https://twb-python-engine.onrender.com/analyse/single',
       form,
       {
         headers: form.getHeaders(),
-        timeout: 20000 // prevents infinite hanging
+        timeout: 60000
       }
     );
 
-    // ✅ 4. Cleanup file
     fs.unlinkSync(req.file.path);
 
-    // ✅ 5. Return response
     res.json(response.data);
 
   } catch (err) {
-    console.error("NODE → PYTHON ERROR:", err.message);
+    console.error("FULL ERROR:", err.response?.data || err.message);
 
-    // ✅ Ensure cleanup even on failure
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
 
     res.status(500).json({
       error: "Analysis failed",
-      details: err.message
+      details: err.response?.data || err.message
     });
   }
 });
